@@ -122,7 +122,7 @@ class Translator:
         return f"{func} ({') ('.join(args)})"
 
     def test_suite_prefix_lines(self, entry_point: str) -> List[str]:
-        return [ f"main = check {entry_point}", f"check {entry_point} = if (True" ]
+        return [ f"main = check {entry_point}", f"check candidate = if (True" ]
     def test_suite_suffix_lines(self) -> List[str]:
         return [ f"  ) then putStrLn \"OK\" else error \"FAIL\""]
     def deep_equality(self, left: str, right: str) -> str:
