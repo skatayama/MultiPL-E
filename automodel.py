@@ -3,12 +3,22 @@ This script produces completions for roughly any AutoModelForCausalLM.
 """
 from multipl_e.completions import make_main, stop_at_stop_token, partial_arg_parser
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
 class Model:
-    def __init__(self, name, revision, tokenizer_name=None, tokenizer_revision=None):
-        self.model = AutoModelForCausalLM.from_pretrained(name, revision=revision, torch_dtype=torch.float16, trust_remote_code=True).cuda()
-        self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_name or name, revision=tokenizer_revision or revision, padding_side="left", trust_remote_code=True)
+    def __init__(self, name, revision, tokenizer_name=None, tokenizer_revision=None, qlora=False):
+        quantization_config = BitsAndBytesConfig(
+          load_in_4bit=True,
+          bnb_4bit_compute_dtype=torch.bfloat16
+        )
+        if qlora:
+            self.model = AutoModelForCausalLM.from_pretrained(name, revision=revision, quantization_config=quantization_config, trust_remote_code=True, device_map="auto")
+        else:
+            self.model = AutoModelForCausalLM.from_pretrained(name, revision=revision, torch_dtype=torch.float16, trust_remote_code=True, device_map="auto")
+# The following line did not work for me (skatayama).
+#        self.model = AutoModelForCausalLM.from_pretrained(name, revision=revision, load_in_8bit=qlora, trust_remote_code=True, device_map="auto")
+        print(self.model)
+        self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_name or name, revision=tokenizer_revision or revision, padding_side="left", trust_remote_code=True, device_map="auto")
         self.tokenizer.pad_token = "<|endoftext|>"
         
     def completion_tensors(
@@ -79,9 +89,11 @@ def do_name_override(args):
 
 def main():
     args = automodel_partial_arg_parser()
+    args.add_argument("--qlora", action="store_true")
     args = args.parse_args()
-    model = Model(args.name, args.revision, args.tokenizer_name, args.tokenizer_revision)
+    model = Model(args.name, args.revision, args.tokenizer_name, args.tokenizer_revision, args.qlora)
     name = do_name_override(args)
+    print("Finished constructing the model.")
     make_main(args, name, model.completions)
 
 if __name__ == "__main__":
