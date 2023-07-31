@@ -84,7 +84,7 @@ def fix_float(s: str) -> str:
 keywords = ["if", "then", "else", "let", "in", "do", "mdu", "rec", "import", "module", "type", "class", "instance", "data", "newtype", "where", "case", "of", "forall", "as", "qualified", "hiding", "deriving", "family", "default", "infix", "infixr", "infixl", "foreign", "proc"]
             
 class Translator:
-    stop = [ "\n\n" ]
+    stop = [ "\n\n\n" ]
 
     def file_ext(self) -> str:
         return "hs"
