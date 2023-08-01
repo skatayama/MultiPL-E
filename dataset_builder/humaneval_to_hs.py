@@ -82,7 +82,16 @@ def fix_float(s: str) -> str:
 
 
 keywords = ["if", "then", "else", "let", "in", "do", "mdu", "rec", "import", "module", "type", "class", "instance", "data", "newtype", "where", "case", "of", "forall", "as", "qualified", "hiding", "deriving", "family", "default", "infix", "infixr", "infixl", "foreign", "proc"]
-            
+
+# all necessary imports need to be here.
+imports = """import Data.List
+import Data.Maybe
+import Data.Char
+import Data.Function
+import Control.Monad
+import qualified Data.HashMap.Strict as M
+"""
+
 class Translator:
     stop = [ "\n\n\n" ]
 
@@ -91,8 +100,7 @@ class Translator:
 
     def translate_prompt(self, name: str, args: List[ast.arg], returns: ast.expr, description: str) -> str:
         self.type = [[arg.annotation for arg in args], returns]
-        return ("-- " + ('\n-- '.join(description.split('\n'))) + f"\n{name} :: {' -> '.join([translate_type(arg.annotation) for arg in args])} -> {translate_type(returns)}\n{name} =")
-# all necessary imports (such as HashMap) need to be prefixed here.
+        return (imports + "-- " + ('\n-- '.join(description.split('\n'))) + f"\n{name} :: {' -> '.join([translate_type(arg.annotation) for arg in args])} -> {translate_type(returns)}\n{name} =")
 
     def gen_literal(self, c: bool | str | int | float | None) -> str:
         if type(c) == float:
