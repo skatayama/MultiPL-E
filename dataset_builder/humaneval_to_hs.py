@@ -92,15 +92,25 @@ import Control.Monad
 import qualified Data.HashMap.Strict as M
 """
 
+# lower the first letter of a string
+def lower_first(s: str) -> str:
+    return s[0].lower() + s[1:]
+def mkValidVar(s: str) -> str:
+    v = lower_first(s)
+    if v in keywords:
+        return v+"'"
+    return v
+
 class Translator:
-    stop = [ "\n\n\n" ]
+    stop = [ "\n\n" ]
 
     def file_ext(self) -> str:
         return "hs"
 
     def translate_prompt(self, name: str, args: List[ast.arg], returns: ast.expr, description: str) -> str:
         self.type = [[arg.annotation for arg in args], returns]
-        return (imports + "-- " + ('\n-- '.join(description.split('\n'))) + f"\n{name} :: {' -> '.join([translate_type(arg.annotation) for arg in args])} -> {translate_type(returns)}\n{name} =")
+        validName = mkValidVar(name)
+        return (imports + "-- " + ('\n-- '.join(description.split('\n'))) + f"\n{validName} :: {' -> '.join([translate_type(arg.annotation) for arg in args])} -> {translate_type(returns)}\n{validName} ")
 
     def gen_literal(self, c: bool | str | int | float | None) -> str:
         if type(c) == float:
@@ -130,7 +140,7 @@ class Translator:
         return f"{func} ({') ('.join(args)})"
 
     def test_suite_prefix_lines(self, entry_point: str) -> List[str]:
-        return [ f"main = check {entry_point}", f"check candidate = if (True" ]
+        return [ f"main = check {lower_first(entry_point)}", f"check candidate = if (True" ]
     def test_suite_suffix_lines(self) -> List[str]:
         return [ f"  ) then putStrLn \"OK\" else error \"FAIL\""]
     def deep_equality(self, left: str, right: str) -> str:
