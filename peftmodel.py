@@ -5,11 +5,12 @@ from automodel import automodel_partial_arg_parser, do_name_override, Model
 def main():
     # Add a new argument for the Peft model.
     args = automodel_partial_arg_parser()
+    args.add_argument("--qlora", action="store_true")
     args.add_argument("--peft-model", type=str, required=True)
     args = args.parse_args()
 
     # Instantiate an AutoModel, but replace it with the PeftModel.
-    model = Model(args.name, args.revision, args.tokenizer_name, args.tokenizer_revision)
+    model = Model(args.name, args.revision, args.tokenizer_name, args.tokenizer_revision, args.qlora)
     peft_model = PeftModel.from_pretrained(model.model, args.peft_model)
     model.model = peft_model
 
