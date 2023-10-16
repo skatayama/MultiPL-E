@@ -83,11 +83,22 @@ def fix_float(s: str) -> str:
 
 keywords = ["if", "then", "else", "let", "in", "do", "mdu", "rec", "import", "module", "type", "class", "instance", "data", "newtype", "where", "case", "of", "forall", "as", "qualified", "hiding", "deriving", "family", "default", "infix", "infixr", "infixl", "foreign", "proc"]
 
-# all necessary imports need to be here.
+# all necessary imports should be here.
 imports = """import Data.List
 import Data.Maybe
 import Data.Char
 import Data.Function
+import Control.Monad
+import qualified Data.HashMap.Strict as M
+"""
+# The following alternative is comprehensive, but sometimes requests increasing max_new_tokens (or maybe max_length?)
+importsPlus = """{-# LANGUAGE LambdaCase, BangPatterns, TupleSections, PatternGuards #-}
+import Data.List
+import Data.Maybe
+import Data.Char
+import Data.Function
+import Data.Monoid
+import Control.Arrow
 import Control.Monad
 import qualified Data.HashMap.Strict as M
 """
